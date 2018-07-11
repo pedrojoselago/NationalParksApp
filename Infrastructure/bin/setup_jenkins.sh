@@ -28,87 +28,17 @@ echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cl
 
 # To be Implemented by Student
 
-# Set up Jenkins
-oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi -n ${GUID}-jenkins
-oc set resources dc/jenkins --limits=memory=2Gi,cpu=1 --requests=memory=2Gi,cpu=1 -n ${GUID}-jenkins
+oc new-app -f ./Infrastructure/templates/template4jenkins.yaml -p MEMORY_LIMIT=2Gi --p VOLUME_CAPACITY=4Gi -n ${GUID}-jenkins
 
-# Create custom Slave Builder Image with skopeo
-oc new-build -D $'FROM docker.io/openshift/jenkins-slave-maven-centos7:v3.9\nUSER root\nRUN yum -y install skopeo && yum clean all\nUSER 1001' --name=jenkins-slave-appdev -n ${GUID}-jenkins
+docker build ./Infrastructure/extra -t docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9
+skopeo copy --dest-tls-verify=false --dest-creds=$(oc whoami):$(oc whoami -t) docker-daemon:docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9 docker://docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9
 
-echo "apiVersion: build.openshift.io/v1
-kind: BuildConfig
-metadata:
-  name: mlbparks-pipeline
-spec:
-  nodeSelector: {}
-  output: {}
-  postCommit: {}
-  resources: {}
-  runPolicy: Serial
-  source:
-    git:
-      ref: master
-      uri: ${REPO}
-    contextDir: "MLBParks"
-    type: Git
-  strategy:
-    jenkinsPipelineStrategy:
-      env:
-      - name: GUID
-        value: ${GUID}
-      - name: CLUSTER
-        value: ${CLUSTER}
-      jenkinsfilePath: Jenkinsfile
-    type: JenkinsPipeline" | oc create -f - -n ${GUID}-jenkins
+oc new-app -f ./Infrastructure/templates/template4jenkinsmavenslave.yaml -p GUID=${GUID}
 
-echo "apiVersion: build.openshift.io/v1
-kind: BuildConfig
-metadata:
-  name: nationalparks-pipeline
-spec:
-  nodeSelector: {}
-  output: {}
-  postCommit: {}
-  resources: {}
-  runPolicy: Serial
-  source:
-    git:
-      ref: master
-      uri: ${REPO}
-    contextDir: "Nationalparks"
-    type: Git
-  strategy:
-    jenkinsPipelineStrategy:
-      env:
-      - name: GUID
-        value: ${GUID}
-      - name: CLUSTER
-        value: ${CLUSTER}
-      jenkinsfilePath: Jenkinsfile
-    type: JenkinsPipeline" | oc create -f - -n ${GUID}-jenkins
 
-echo "apiVersion: build.openshift.io/v1
-kind: BuildConfig
-metadata:
-  name: parksmap-pipeline
-spec:
-  nodeSelector: {}
-  output: {}
-  postCommit: {}
-  resources: {}
-  runPolicy: Serial
-  source:
-    git:
-      ref: master
-      uri: ${REPO}
-    contextDir: "ParksMap"
-    type: Git
-  strategy:
-    jenkinsPipelineStrategy:
-      env:
-      - name: GUID
-        value: ${GUID}
-      - name: CLUSTER
-        value: ${CLUSTER}
-      jenkinsfilePath: Jenkinsfile
-    type: JenkinsPipeline" | oc create -f - -n ${GUID}-jenkins
+# Create build config pipelines
+oc process -f ./Infrastructure/templates/mlbparks-pipeline-template.yaml --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
+oc process -f ./Infrastructure/templates/nationalparks-pipeline-template.yaml --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
+oc process -f ./Infrastructure/templates/parksmap-pipeline-template.yaml --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
+
+
