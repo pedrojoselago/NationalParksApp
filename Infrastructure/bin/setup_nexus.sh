@@ -42,8 +42,15 @@ done
 
 # When Nexus is ready, its time to configure it...
 oc project ${GUID}-nexus
-chmod +x ./Infrastructure/extraresources/setup_nexus.sh
-echo "Executing script to setup Nexus repositories and Docker registry"
-./Infrastructure/extraresources/setup_nexus.sh admin admin123 http://$(oc get route nexus3 --template='{{ .spec.host }}')
+#chmod +x ./Infrastructure/extraresources/setup_nexus.sh
+#echo "Executing script to setup Nexus repositories and Docker registry"
+#./Infrastructure/extraresources/setup_nexus.sh admin admin123 http://$(oc get route nexus3 --template='{{ .spec.host }}')
+
+echo "Executing script to setup Nexus repositories and Docker registry... Starting"
+curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh
+chmod +x setup_nexus3.sh
+./setup_nexus3.sh admin admin123 http://$(oc get route nexus3 --template='{{ .spec.host }}')
+rm setup_nexus3.sh
+echo "Executing script to setup Nexus repositories and Docker registry... Ended!!"
 
 
