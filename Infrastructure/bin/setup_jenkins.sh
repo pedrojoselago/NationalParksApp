@@ -36,8 +36,8 @@ skopeo copy --dest-tls-verify=false --dest-creds=$(oc whoami):$(oc whoami -t) do
 oc new-app -f ./Infrastructure/templates/template-jenkinsmavenslave.json --param GUID=${GUID}
 
 # Create build config pipelines
-oc process -f ../templates/template-mlbparks-pipeline.json --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
-oc process -f ../templates/template-nationalparks-pipeline.json --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
-oc process -f ../templates/template-parksmap-pipeline.json --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
+oc process -f ./Infrastructure/templates/template-mlbparks-pipeline.json --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
+oc process -f ./Infrastructure/templates/template-nationalparks-pipeline.json --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
+oc process -f ./Infrastructure/templates/template-parksmap-pipeline.json --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
 
 
