@@ -30,44 +30,24 @@ echo "Setting up Nexus in project $GUID-nexus"
 
 # To be Implemented by Studeny
 
+oc new-app -f ../templates/template4nexus.yaml --param GUID=${GUID} -n ${GUID}-nexus
 
-oc new-app sonatype/nexus3:latest -n ${GUID}-nexus
-oc expose svc nexus3 -n ${GUID}-nexus
-oc rollout pause dc nexus3 -n ${GUID}-nexus
-oc patch dc nexus3 --patch='{ "spec": { "strategy": { "type": "Recreate" }}}' -n ${GUID}-nexus
-oc set resources dc nexus3 --limits=memory=2Gi --requests=memory=1Gi -n ${GUID}-nexus
-echo "apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: nexus-pvc
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 4Gi" | oc create -f - -n ${GUID}-nexus
-
-oc set volume dc/nexus3 --add --overwrite --name=nexus3-volume-1 --mount-path=/nexus-data/ --type persistentVolumeClaim --claim-name=nexus-pvc -n ${GUID}-nexus
-oc set resources dc/nexus3 --limits=memory=2Gi,cpu=1 --requests=memory=2Gi,cpu=1 -n ${GUID}-nexus
-oc set probe dc/nexus3 -n ${GUID}-nexus --liveness --failure-threshold 3 --initial-delay-seconds 60 -- echo ok 
-oc set probe dc/nexus3 -n ${GUID}-nexus --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8081/repository/maven-public/
-oc rollout resume dc nexus3 -n ${GUID}-nexus
-
-# Check if Nexus if ready and sleep 10 seconds if not yet
 while : ; do
-  echo "Checking if Nexus is Ready..."
-  oc get pod -n ${GUID}-nexus|grep '\-2\-'|grep -v deploy|grep "1/1"
-  [[ "$?" == "1" ]] || break
-  echo "...no. Sleeping 10 seconds."
-  sleep 10
+echo "Checking if Nexus is Ready..."
+ oc get pod -n ${GUID}-nexus|grep '\-1\-'|grep -v deploy|grep "1/1"
+ [[ "$?" == "1" ]] || break
+ echo "...no. Sleeping 10 seconds."
+ sleep 10
 done
 
-# Configure Nexus
+# When Nexus is ready, its time to configure it...
+oc project ${GUID}-nexus
+echo "Downloading script to setup Nexus repositories and Docker registry"
 curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh
 chmod +x setup_nexus3.sh
-./setup_nexus3.sh admin admin123 http://$(oc get route nexus3 --template='{{ .spec.host }}' -n ${GUID}-nexus)
+echo "Executing script to setup Nexus repositories and Docker registry"
+./setup_nexus3.sh admin admin123 http://$(oc get route nexus3 --template='{{ .spec.host }}')
+
+# Finally remove Nexus' configuration script
 rm setup_nexus3.sh
 
-# Expose Container Registry
-oc expose dc nexus3 --port=5000 --name=nexus-registry -n ${GUID}-nexus
-oc create route edge nexus-registry --service=nexus-registry --port=5000 -n ${GUID}-nexus
