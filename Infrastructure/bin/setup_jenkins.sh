@@ -35,7 +35,6 @@ skopeo copy --dest-tls-verify=false --dest-creds=$(oc whoami):$(oc whoami -t) do
 
 oc new-app -f ../templates/template-jenkinsmavenslave.json -p GUID=${GUID}
 
-
 # Create build config pipelines
 #oc process -f ../templates/template-mlbparks-pipeline.yaml --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
 #oc process -f ../templates/template-nationalparks-pipeline.yaml --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
