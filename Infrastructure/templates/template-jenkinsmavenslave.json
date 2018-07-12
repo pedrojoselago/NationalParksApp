@@ -1,0 +1,38 @@
+{
+    "apiVersion": "v1",
+    "kind": "Template",
+    "labels": {
+        "template": "cicd",
+        "group": "cicd"
+    },
+    "metadata": {
+        "annotations": {
+            "iconClass": "icon-jenkins"
+        },
+        "name": "Jenkins"
+    },
+    "message": "Use your OpenShift credentials for login.",
+    "parameters": [
+        {
+            "name": "GUID",
+            "description": "The GUID running command",
+            "value": "al1"
+        }
+    ],
+    "objects": [
+        {
+            "apiVersion": "v1",
+            "kind": "ConfigMap",
+            "metadata": {
+                "labels": {
+                    "app": "jenkins-pipeline",
+                    "role": "jenkins-slave"
+                },
+                "name": "jenkins-slaves"
+            },
+            "data": {
+                "maven-template": "<org.csanchez.jenkins.plugins.kubernetes.PodTemplate>\n  <inheritFrom></inheritFrom>\n  <name>maven-appdev</name>\n  <namespace></namespace>\n  <privileged>false</privileged>\n  <alwaysPullImage>false</alwaysPullImage>\n  <instanceCap>2147483647</instanceCap>\n  <slaveConnectTimeout>100</slaveConnectTimeout>\n  <idleMinutes>10</idleMinutes>\n  <activeDeadlineSeconds>0</activeDeadlineSeconds>\n  <label>maven-appdev</label>\n  <serviceAccount>jenkins</serviceAccount>\n  <nodeSelector></nodeSelector>\n  <nodeUsageMode>NORMAL</nodeUsageMode>\n  <customWorkspaceVolumeEnabled>false</customWorkspaceVolumeEnabled>\n  <workspaceVolume class=\"org.csanchez.jenkins.plugins.kubernetes.volumes.workspace.EmptyDirWorkspaceVolume\">\n    <memory>false</memory>\n  </workspaceVolume>\n  <containers>\n    <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>\n      <name>jnlp</name>\n      <image>docker-registry.default.svc:5000/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9</image>\n      <privileged>false</privileged>\n      <alwaysPullImage>false</alwaysPullImage>\n      <workingDir>/tmp</workingDir>\n      <command></command>\n      <args>${computer.jnlpmac} ${computer.name}</args>\n      <ttyEnabled>false</ttyEnabled>\n      <resourceRequestCpu></resourceRequestCpu>\n      <resourceRequestMemory></resourceRequestMemory>\n      <resourceLimitCpu></resourceLimitCpu>\n      <resourceLimitMemory>2Gi</resourceLimitMemory>\n      <envVars/>\n      <ports/>\n      <livenessProbe>\n        <execArgs></execArgs>\n        <timeoutSeconds>0</timeoutSeconds>\n        <initialDelaySeconds>0</initialDelaySeconds>\n        <failureThreshold>0</failureThreshold>\n        <periodSeconds>0</periodSeconds>\n        <successThreshold>0</successThreshold>\n      </livenessProbe>\n    </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>\n  </containers>\n  <envVars/>\n  <annotations/>\n  <imagePullSecrets/>\n</org.csanchez.jenkins.plugins.kubernetes.PodTemplate>"
+            }
+        }
+    ]
+}
