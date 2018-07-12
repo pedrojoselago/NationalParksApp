@@ -14,5 +14,12 @@ echo "Setting up Sonarqube in project $GUID-sonarqube"
 # oc new-app -f ../templates/sonarqube.yaml --param .....
 
 # To be Implemented by Student
-oc new-app -f ./Infrastructure/templates/template-sonar.yaml --param GUID=${GUID} --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param POSTGRESQL_VOLUME_CAPACITY=4Gi -n $GUID-sonarqube
+#oc new-app -f ./Infrastructure/templates/template-sonar.yaml --param GUID=${GUID} --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param POSTGRESQL_VOLUME_CAPACITY=4Gi -n $GUID-sonarqube
+oc new-app -f ./Infrastructure/templates/template-sonar.yaml \
+ --param SONARQUBE_VERSION=6.7.4 \
+ --param POSTGRESQL_PASSWORD=sonar \
+ --param POSTGRESQL_VOLUME_CAPACITY=4Gi \
+ --param SONAR_VOLUME_CAPACITY=4Gi \
+ --param GUID=${GUID} \
+ -n ${GUID}-sonarqube
 
