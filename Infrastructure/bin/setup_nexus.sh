@@ -30,7 +30,7 @@ echo "Setting up Nexus in project $GUID-nexus"
 
 # To be Implemented by Studeny
 
-oc new-app -f ../templates/template4nexus.yaml --param GUID=${GUID} -n ${GUID}-nexus
+oc new-app -f ../templates/template-nexus.yaml --param GUID=${GUID} -n ${GUID}-nexus
 
 while : ; do
 echo "Checking if Nexus is Ready..."
@@ -42,12 +42,8 @@ done
 
 # When Nexus is ready, its time to configure it...
 oc project ${GUID}-nexus
-echo "Downloading script to setup Nexus repositories and Docker registry"
-curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh
-chmod +x setup_nexus3.sh
+chmod +x ../extraresources/setup_nexus.sh
 echo "Executing script to setup Nexus repositories and Docker registry"
-./setup_nexus3.sh admin admin123 http://$(oc get route nexus3 --template='{{ .spec.host }}')
+../extraresources/setup_nexus3.sh admin admin123 http://$(oc get route nexus3 --template='{{ .spec.host }}')
 
-# Finally remove Nexus' configuration script
-rm setup_nexus3.sh
 

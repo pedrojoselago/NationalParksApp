@@ -28,17 +28,17 @@ echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cl
 
 # To be Implemented by Student
 
-oc new-app -f ../templates/template4jenkins.yaml -p MEMORY_LIMIT=2Gi --p VOLUME_CAPACITY=4Gi -n ${GUID}-jenkins
+oc new-app -f ../templates/template-jenkins.yaml -p MEMORY_LIMIT=2Gi --p VOLUME_CAPACITY=4Gi -n ${GUID}-jenkins
 
-docker build ./Infrastructure/extra -t docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9
+docker build ./Infrastructure/extraresources -t docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9
 skopeo copy --dest-tls-verify=false --dest-creds=$(oc whoami):$(oc whoami -t) docker-daemon:docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9 docker://docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9
 
-oc new-app -f ../templates/template4jenkinsmavenslave.yaml -p GUID=${GUID}
+oc new-app -f ../templates/template-jenkinsmavenslave.yaml -p GUID=${GUID}
 
 
 # Create build config pipelines
-oc process -f ../templates/mlbparks-pipeline-template.yaml --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
-oc process -f ../templates/nationalparks-pipeline-template.yaml --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
-oc process -f ../templates/parksmap-pipeline-template.yaml --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
+#oc process -f ../templates/template-mlbparks-pipeline.yaml --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
+#oc process -f ../templates/template-nationalparks-pipeline.yaml --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
+#oc process -f ../templates/template-parksmap-pipeline.yaml --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
 
 
