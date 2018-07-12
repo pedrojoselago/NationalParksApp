@@ -30,7 +30,7 @@ echo "Setting up Nexus in project $GUID-nexus"
 
 # To be Implemented by Studeny
 
-oc new-app -f ../templates/template-nexus.json --param GUID=${GUID} -n ${GUID}-nexus
+oc new-app -f ./Infrastructure/templates/template-nexus.json --param GUID=${GUID} -n ${GUID}-nexus
 
 while : ; do
 echo "Checking if Nexus is Ready..."
@@ -42,8 +42,8 @@ done
 
 # When Nexus is ready, its time to configure it...
 oc project ${GUID}-nexus
-chmod +x ../extraresources/setup_nexus.sh
+chmod +x ./Infrastructure/extraresources/setup_nexus.sh
 echo "Executing script to setup Nexus repositories and Docker registry"
-../extraresources/setup_nexus3.sh admin admin123 http://$(oc get route nexus3 --template='{{ .spec.host }}')
+./Infrastructure/extraresources/setup_nexus.sh admin admin123 http://$(oc get route nexus3 --template='{{ .spec.host }}')
 
 
