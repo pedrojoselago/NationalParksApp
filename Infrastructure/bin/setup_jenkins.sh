@@ -42,4 +42,4 @@ oc process -f ./Infrastructure/templates/template-parksmap-pipeline.json --param
 
 # Wait until Jenkins is ready to serve web pages
 
-bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' https://jenkins-${GUID}-jenkins.${CLUSTER}/login)" != "200" ]]; echo no ok...; do sleep 15; done'
+bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' https://jenkins-${GUID}-jenkins.apps.${CLUSTER}/login)" != "200" ]]; echo no ok...; do sleep 15; done'
