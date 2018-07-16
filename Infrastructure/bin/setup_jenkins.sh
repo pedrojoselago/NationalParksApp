@@ -30,8 +30,8 @@ echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cl
 
 oc new-app -f ./Infrastructure/templates/template-jenkins.json --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi -n ${GUID}-jenkins
 
-docker build ./Infrastructure/extraresources -t docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9
-skopeo copy --dest-tls-verify=false --dest-creds=$(oc whoami):$(oc whoami -t) docker-daemon:docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9 docker://docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9
+sudo docker build ./Infrastructure/extraresources -t docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9
+sudo skopeo copy --dest-tls-verify=false --dest-creds=$(oc whoami):$(oc whoami -t) docker-daemon:docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9 docker://docker-registry-default.apps.${CLUSTER}/${GUID}-jenkins/jenkins-slave-maven-appdev:v3.9
 
 oc new-app -f ./Infrastructure/templates/template-jenkinsmavenslave.json --param GUID=${GUID}
 
@@ -40,4 +40,6 @@ oc process -f ./Infrastructure/templates/template-mlbparks-pipeline.json --param
 oc process -f ./Infrastructure/templates/template-nationalparks-pipeline.json --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
 oc process -f ./Infrastructure/templates/template-parksmap-pipeline.json --param REPO=${REPO} --param GUID=${GUID} --param CLUSTER=${CLUSTER} | oc create -f - -n ${GUID}-jenkins
 
+# Wait until Jenkins is ready to serve web pages
 
+bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' https://jenkins-${GUID}-jenkins.${CLUSTER}/login)" != "200" ]]; echo no ok...; do sleep 15; done'
